@@ -1,0 +1,101 @@
+{
+  "name": "email automation",
+  "description": "AI-powered cold email outreach system. Reads leads from Google Sheets, generates industry-aware email context using GLM-4, creates Pollinations.ai banner images per company, writes personalized cold emails via AI Agent, sends via Gmail, and tracks status back to Sheets. Includes Zomato tool for restaurant lead enrichment.",
+  "nodes": [
+    {
+      "id": "19bdd47e-bf65-4eb4-bb01-dbd8228c0ce2",
+      "name": "Read Leads from Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-816, 48],
+      "parameters": {
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Sheet1" },
+        "filtersUI": { "values": [] }
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets OAuth2 API" } }
+    },
+    {
+      "id": "433e2533-5501-437e-89d0-5e483449d06d",
+      "name": "Loop Over Leads",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-608, 48],
+      "parameters": {}
+    },
+    {
+      "id": "375c7327-4ffa-4558-9481-68255cca8689",
+      "name": "Lead Prompt Generator AI",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [-400, 64],
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a marketing intelligence AI. Analyze this business lead and generate creative context for an AI-powered email campaign.\n\nData:\n- Company: {{ $json.Company }}\n- Contact Name: {{ $json.Name }}\n- Email: {{ $json.Email }}\n- Notes: {{ $json.Notes }}\n\nBased on the company name and notes, intelligently detect the industry and generate the following as JSON:\n1. detectedIndustry\n2. brandPersonality\n3. visualStyle\n4. colorPalette\n5. emailTone\n6. bannerImagePrompt\n7. emailWritingContext\n8. aiAgentContext\n\nReturn ONLY valid JSON with these 8 fields.",
+        "hasOutputParser": true
+      }
+    },
+    {
+      "id": "deabd13e-70cb-462d-beb5-a35763541d38",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-48, 80],
+      "parameters": {
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  const rawText = item.json.text;\n  let aiData;\n  try {\n    const cleaned = rawText.replace(/```json?/g, '').replace(/```/g, '').trim();\n    aiData = JSON.parse(cleaned);\n  } catch(e) {\n    aiData = { detectedIndustry: 'general', brandPersonality: 'professional', visualStyle: 'modern', colorPalette: 'blue and white', emailTone: 'professional', bannerImagePrompt: item.json.Company + ' business banner', emailWritingContext: 'Write a professional cold outreach email.', aiAgentContext: 'Generic business outreach.' };\n  }\n  const bannerPrompt = aiData.bannerImagePrompt + ' ' + item.json.Company + ' marketing banner';\n  const bannerImageUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(bannerPrompt) + '?width=600&height=200&nologo=true&seed=42';\n  results.push({ json: { ...item.json, ...aiData, bannerImageUrl } });\n}\nreturn results;"
+      }
+    },
+    {
+      "id": "4338dd80-9583-4b26-99de-7db4edb2da13",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [240, -64],
+      "parameters": {
+        "promptType": "define",
+        "text": "{{ $json.writingInstructions }}\n{{ $json.aiAgentContext }}\n\nWrite a cold outreach email for this lead:\n- Name: {{ $json.Name }}\n- Company: {{ $json.Company }}\n- Notes/Context: {{ $json.Notes }}\n- Banner Image URL: {{ $json.bannerImageUrl }}\n\nIMPORTANT: At the top of the email body, include this HTML image tag exactly as shown (replace the URL placeholder with the actual banner image URL provided above):\n<img src='BANNER_URL_HERE' alt='Custom Banner' style='width:100%;max-width:600px;display:block;margin:0 auto 16px'>\n\nFormat your response as:\nemail subject line\n---\nemail body with the img tag at the top"
+      }
+    },
+    {
+      "id": "87910cf4-19b0-443a-bb21-6aa0368e1a6e",
+      "name": "Send Email via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [576, -64],
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Exclusive Opportunity for {{ $json.Company }}",
+        "message": "={{ $json.output }}"
+      },
+      "credentials": { "gmailOAuth2": { "name": "Gmail OAuth2 API" } }
+    },
+    {
+      "id": "dac2b389-ab28-4c70-95c6-a2988824dc38",
+      "name": "Mark as Emailed",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [480, 112],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Sheet1" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": { "Status": "Emailed", "EmailedAt": "={{ $now.toISO() }}" },
+          "matchingColumns": ["Email"]
+        }
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets OAuth2 API" } }
+    }
+  ],
+  "connections": {
+    "Read Leads from Sheet": { "main": [[{ "node": "Loop Over Leads", "type": "main", "index": 0 }]] },
+    "Loop Over Leads": { "main": [[{ "node": "Lead Prompt Generator AI", "type": "main", "index": 0 }]] },
+    "Lead Prompt Generator AI": { "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Send Email via Gmail", "type": "main", "index": 0 }, { "node": "Mark as Emailed", "type": "main", "index": 0 }]] },
+    "Mark as Emailed": { "main": [[{ "node": "Loop Over Leads", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true }
+}
