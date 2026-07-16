@@ -1,0 +1,57 @@
+{
+  "name": "Lead Search Scoring Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "={{ $json['Business Type'] }} in {{ $json['Target City Area'] }}" },
+            { "name": "key", "value": "YOUR_GOOGLE_PLACES_API_KEY" }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [224, 272],
+      "id": "11b30c98-15de-40c2-920e-218fd744f57f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lead Enrichment & Scoring Engine\nconst input = $input.first();\nconst apiResponse = input.json;\nconst places = apiResponse.results;\nconst minRating = parseFloat($('On form submission').first().json['Min Google Rating']) || 0;\nconst hotThreshold = parseInt($('On form submission').first().json['Hot Lead Score Threshold']) || 60;\n\nconst scoredLeads = [];\nfor (const place of places) {\n  const name = place.name || 'Unknown';\n  const address = place.formatted_address;\n  const rating = place.rating || 0;\n  const reviewCount = place.user_ratings_total || 0;\n  const priceLevel = place.price_level || 0;\n  const isOpen = place.opening_hours?.open_now;\n  const types = place.types;\n  const placeId = place.place_id;\n  const phone = place.formatted_phone_number || 'NA';\n  const website = place.website || 'NA';\n\n  let score = 0;\n  let scoreBreakdown = [];\n\n  // 1. Google Rating (0-25 pts)\n  const ratingScore = Math.round(rating / 5 * 25);\n  score += ratingScore;\n  scoreBreakdown.push(`Rating: ${ratingScore}pts (${rating})`);\n\n  // 2. Review Volume (0-20 pts)\n  let reviewScore = 0;\n  if (reviewCount >= 500) reviewScore = 20;\n  else if (reviewCount >= 200) reviewScore = 15;\n  else if (reviewCount >= 100) reviewScore = 10;\n  else if (reviewCount >= 50) reviewScore = 5;\n  else if (reviewCount >= 20) reviewScore = 3;\n  score += reviewScore;\n  scoreBreakdown.push(`Reviews: ${reviewScore}pts (${reviewCount})`);\n\n  // 3. No Website = Higher Need (0-20 pts)\n  let websiteScore = 0;\n  if (!website || website === 'NA') { websiteScore = 20; scoreBreakdown.push('No website: 20pts'); }\n  else { websiteScore = 5; scoreBreakdown.push('Has website: 5pts'); }\n  score += websiteScore;\n\n  // 4. Currently Open (10 pts)\n  if (isOpen === true) { score += 10; scoreBreakdown.push('Currently open: 10pts'); }\n\n  // 5. Improvement Opportunity (10 pts)\n  if (rating > 0 && rating < 4.0 && reviewCount >= 30) { score += 10; scoreBreakdown.push('Improvement opportunity: 10pts'); }\n\n  // 6. Price Level (0-15 pts)\n  if (priceLevel === 2 || priceLevel === 3) { score += 15; scoreBreakdown.push(`Price tier ${priceLevel}: 15pts`); }\n  else if (priceLevel === 1) { score += 5; scoreBreakdown.push('Price tier 1: 5pts'); }\n\n  if (minRating > 0 && rating < minRating) continue;\n\n  const status = score >= hotThreshold ? 'HOT - Call Now' : 'NURTURE';\n  const priority = score >= 80 ? 'HIGH' : score >= 60 ? 'MEDIUM' : 'LOW';\n\n  scoredLeads.push({\n    json: {\n      name, address, phone, website,\n      google_rating: rating, review_count: reviewCount, price_level: priceLevel, place_id: placeId,\n      lead_score: score, lead_status: status, priority,\n      score_breakdown: scoreBreakdown.join(', '),\n      scored_at: new Date().toISOString(),\n      hot_threshold_used: hotThreshold,\n      google_maps_url: `https://maps.google.com/?cid=${placeId}`\n    }\n  });\n}\n\nscoredLeads.sort((a, b) => b.json.lead_score - a.json.lead_score);\nreturn scoredLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [448, 272],
+      "id": "c9435aeb-3d31-440c-9a56-11c04f20c008",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "conditions": [{
+            "id": "14faceba-2d7e-4b1b-ba06-4888fa3e5ad2",
+            "leftValue": "={{ $json.lead_status }}",
+            "rightValue": "HOT - Call Now",
+            "operator": { "type": "string", "operation": "equals" }
+          }],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [672, 272],
+      "id": "a4ba928d-6be7-44b5-86d6-aa0b08bfc3c9",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "HTTP Request": { "main": [[{ "node": "Code in JavaScript", "type": "main", "index": 0 }]] },
+    "Code in JavaScript": { "main": [[{ "node": "If", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true }
+}
