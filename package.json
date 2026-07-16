@@ -1,0 +1,41 @@
+{
+  "name": "outreach-os",
+  "version": "1.0.0",
+  "description": "Open-source AI-powered B2B outreach system — lead scoring, personalized cold emails, reply tracking & auto follow-up. Built with N8N, OpenAI, GLM-4, and Google Places API.",
+  "main": "index.js",
+  "bin": {
+    "outreach-os": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "n8n",
+    "automation",
+    "outreach",
+    "cold-email",
+    "lead-generation",
+    "ai",
+    "b2b",
+    "crm",
+    "sales-automation",
+    "glm4",
+    "openai",
+    "google-places",
+    "gmail",
+    "workflow"
+  ],
+  "author": "hitb1099",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hitb1099/outreach-os.git"
+  },
+  "homepage": "https://github.com/hitb1099/outreach-os#readme",
+  "bugs": {
+    "url": "https://github.com/hitb1099/outreach-os/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
