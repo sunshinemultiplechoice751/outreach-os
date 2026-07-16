@@ -1,0 +1,129 @@
+{
+  "name": "Email Reply Tracker and Automated Follow-Up System",
+  "description": "Runs daily at 9AM. For each emailed lead, checks Gmail for replies using the stored MessageId. If a reply is found, marks the lead as Replied in Google Sheets. If no reply after 3 days, sends an automated follow-up email and marks as FollowedUp. Keeps the full outreach pipeline status in sync.",
+  "nodes": [
+    {
+      "id": "067740a5-a7e6-408c-b299-720022be5e6a",
+      "name": "Every Day at 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [240, 384],
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 9 }] }
+      }
+    },
+    {
+      "id": "4f3d3673-055f-48a9-aed3-336678e4e45c",
+      "name": "Read Emailed Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [464, 384],
+      "parameters": {
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Sheet1" }
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets OAuth2 API" } }
+    },
+    {
+      "id": "e6c34eb8-00f1-4d86-a407-486da659df20",
+      "name": "Process Each Lead",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [688, 384],
+      "parameters": {}
+    },
+    {
+      "id": "109717b7-6fe4-4e16-9532-91bb07f886bd",
+      "name": "Search for Reply",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [912, 208],
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {
+          "receivedAfter": "={{ $json.EmailedAt }}",
+          "sender": "={{ $json.Email }}"
+        }
+      },
+      "credentials": { "gmailOAuth2": { "name": "Gmail OAuth2 API" } }
+    },
+    {
+      "id": "f2712950-7db8-4dba-ad34-ac642847ba59",
+      "name": "Reply Found or 3 Days?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1136, 208],
+      "parameters": {
+        "conditions": {
+          "combinator": "or",
+          "conditions": [
+            { "id": "1", "leftValue": "={{ $('Search for Reply').all().length }}", "rightValue": 0, "operator": { "type": "number", "operation": "gt" } },
+            { "id": "2", "leftValue": "={{ $now.diff(DateTime.fromISO($('Read Emailed Leads').item.json.EmailedAt), 'days').days }}", "rightValue": 3, "operator": { "type": "number", "operation": "gte" } }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dbc05c28-1112-404f-8db6-af581d43de77",
+      "name": "Update Status to Replied",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1360, 208],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Sheet1" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": { "Status": "Replied" },
+          "matchingColumns": ["Email"]
+        }
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets OAuth2 API" } }
+    },
+    {
+      "id": "02f8fad8-28ef-4d2a-acab-5ebab154a2fa",
+      "name": "Send Follow-Up Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [1360, 400],
+      "parameters": {
+        "sendTo": "={{ $('Read Emailed Leads').item.json.Email }}",
+        "subject": "Following up on my previous email",
+        "message": "<p>Hi {{ $('Read Emailed Leads').item.json.Name }},</p><p>Just wanted to follow up on my previous email. I'd love to connect and explore how we can help {{ $('Read Emailed Leads').item.json.Company }}.</p><p>Would you be open to a quick 15-minute call this week?</p><p>Best regards</p>"
+      },
+      "credentials": { "gmailOAuth2": { "name": "Gmail OAuth2 API" } }
+    },
+    {
+      "id": "859f893a-c20c-4f62-96ee-9b8f3cb34d6a",
+      "name": "Update Status to FollowedUp",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1584, 496],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Sheet1" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": { "Status": "FollowedUp" },
+          "matchingColumns": ["Email"]
+        }
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets OAuth2 API" } }
+    }
+  ],
+  "connections": {
+    "Every Day at 9 AM": { "main": [[{ "node": "Read Emailed Leads", "type": "main", "index": 0 }]] },
+    "Read Emailed Leads": { "main": [[{ "node": "Process Each Lead", "type": "main", "index": 0 }]] },
+    "Process Each Lead": { "main": [[{ "node": "Search for Reply", "type": "main", "index": 0 }]] },
+    "Search for Reply": { "main": [[{ "node": "Reply Found or 3 Days?", "type": "main", "index": 0 }]] },
+    "Reply Found or 3 Days?": { "main": [[{ "node": "Update Status to Replied", "type": "main", "index": 0 }], [{ "node": "Send Follow-Up Email", "type": "main", "index": 0 }]] },
+    "Update Status to Replied": { "main": [[{ "node": "Process Each Lead", "type": "main", "index": 0 }]] },
+    "Send Follow-Up Email": { "main": [[{ "node": "Update Status to FollowedUp", "type": "main", "index": 0 }]] },
+    "Update Status to FollowedUp": { "main": [[{ "node": "Process Each Lead", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true }
+}
