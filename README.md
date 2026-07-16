@@ -138,6 +138,38 @@ Status values: `Pending` → `Emailed` → `Replied` or `FollowedUp`
 - [Gmail API](https://developers.google.com/gmail/api) — email sending & tracking
 - [Zomato](https://www.zomato.com) — restaurant data enrichment
 
+## Roadmap
+
+> Track active development. PRs welcome!
+
+### v1.x — Current
+- [x] Lead search via Google Places API
+- [x] 100-point lead scoring algorithm
+- [x] HOT vs NURTURE auto-categorization in Google Sheets
+- [x] AI personalized cold email generation (GLM-4 / GPT-4o-mini)
+- [x] AI banner image creation via Pollinations.ai
+- [x] Gmail sending integration
+- [x] Daily reply tracking (9AM schedule)
+- [x] Auto follow-up after 3 days of silence
+- [x] Full status tracking: Pending → Emailed → Replied / FollowedUp
+- [x] Published on npm as `outreach-os`
+
+### v2.0 — Coming Soon
+- [ ] LinkedIn outreach integration
+- [ ] WhatsApp follow-ups via Twilio
+- [ ] Webhook triggers (real-time instead of scheduled)
+- [ ] More industry-specific email templates (SaaS, e-commerce, agencies)
+- [ ] Open rate & click tracking dashboard
+- [ ] GitHub Actions CI for automated testing
+- [ ] One-click deploy to Railway / Render
+
+### v3.0 — Future Vision
+- [ ] Web dashboard UI for managing leads
+- [ ] Multi-channel outreach (email + LinkedIn + WhatsApp)
+- [ ] CRM integrations (HubSpot, Airtable, Notion)
+- [ ] Analytics: reply rate, open rate, conversion tracking
+- [ ] Community template library
+
 ---
 
 ## Contributing
